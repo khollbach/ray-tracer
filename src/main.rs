@@ -4,18 +4,24 @@ fn main() {
 
 /// Red gradient.
 fn print_circle_ppm(r: f64) {
-    const X: u32 = 64;
-    const Y: u32 = 48;
+    let x_max = 64;
+    let y_max = 48;
 
     println!("P3");
-    println!("{X} {Y} 255");
+    println!("{x_max} {y_max} 255");
     println!();
 
-    for y in 0..Y {
-        for x in 0..X {
-            let dx = x.abs_diff(X / 2) as f64;
-            let dy = y.abs_diff(Y / 2) as f64;
+    for y in 0..y_max {
+        for x in 0..x_max {
+            let x_max = x_max as f64;
+            let y_max = y_max as f64;
+            let x = x as f64;
+            let y = y as f64;
+
+            let dx = x - x_max / 2.;
+            let dy = y - y_max / 2.;
             let hit = dx.powf(2.) + dy.powf(2.) < r.powf(2.);
+
             if hit {
                 let diam = r * 2.;
                 let x_percent = (dx + r) / diam;

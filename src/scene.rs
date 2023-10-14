@@ -1,4 +1,7 @@
-use crate::{sphere::{Sphere, Color}, vec3::Vec3};
+use crate::{
+    sphere::{Color, Sphere},
+    vec3::Vec3,
+};
 
 pub struct Scene {
     spheres: Vec<Sphere>,
@@ -8,6 +11,8 @@ pub struct Scene {
     focal_distance: f64,
     screen_width: u32,
     screen_height: u32,
+    light_source: Vec3,
+    light_color: Color,
 }
 
 const SPHERE_1: Sphere = Sphere {
@@ -36,6 +41,8 @@ impl Scene {
             focal_distance: 10.,
             screen_width: 64,
             screen_height: 48,
+            light_source: Vec3::new(-10., 10., -20.),
+            light_color: Color::new(255, 200, 255),
         }
     }
 
@@ -61,38 +68,65 @@ impl Scene {
                 let y = y as f64;
                 let p = top_left + [x, -y, 0.].into();
 
-                // compute the dir'n of the ray: d
-                let d = p - self.camera_position;
+                // todo: move this logic into a helper function
+                // that returns a color: self.pixel_color()
 
-                if let Some(color) = self.cast(d) {
-                    println!("{}", color.ppm());
+                // compute the dir'n of the ray
+                let start = self.camera_position;
+                let direction = p - start;
+                let ray = Ray { start, direction };
+
+                if let Some((sphere, p)) = self.cast(ray, f64::MAX) {
+                    // cast another ray, towards the light source
+                    let path = self.light_source - p;
+                    let ray = Ray {
+                        // TODO: this feels like a hack.
+                        // How else can we avoid hitting the current sphere
+                        // when we cast a ray? Maybe we skip it somehow?
+                        start: p + path.normalize().scale(0.1),
+                        direction: path,
+                    };
+                    let max_dist = path.norm();
+
+                    let intercepted = self.cast(ray, max_dist).is_some();
+                    if intercepted {
+                        println!("0 0 0");
+                    } else {
+                        // compute a color value
+                        let brightness = path.normalize() * sphere.normal(p);
+                        let color = self
+                            .light_color
+                            .direct_product(sphere.color)
+                            .scale(brightness);
+                        println!("{}", color.ppm());
+                    }
                 } else {
-                    println!("0 0 0 ");
+                    println!("0 0 0");
                 };
             }
         }
     }
 
-    fn cast(&self, direction: Vec3) -> Option<Color> {
-        let ray = Ray {
-            start: self.camera_position,
-            direction,
-        };
-        let dist = |p: Vec3| (p - ray.start).norm_squared();
+    fn cast(&self, ray: Ray, max_dist: f64) -> Option<(Sphere, Vec3)> {
+        let dist = |p: Vec3| (p - ray.start).norm_squared().sqrt();
 
         let mut closest_hit = None;
         for &s in &self.spheres {
             if let Some(p) = sphere_intersection(ray, s) {
+                if dist(p) > max_dist {
+                    continue;
+                }
+
                 let is_closer = match closest_hit {
-                    Some((curr, _)) => dist(p) < dist(curr),
+                    Some((_, curr)) => dist(p) < dist(curr),
                     None => true,
                 };
                 if is_closer {
-                    closest_hit = Some((p, s.color));
+                    closest_hit = Some((s, p));
                 }
             }
         }
-        closest_hit.map(|(_, color)| color)
+        closest_hit
     }
 }
 
@@ -123,12 +157,15 @@ fn sphere_intersection(ray: Ray, sphere: Sphere) -> Option<Vec3> {
 /// r is the radius of a sphere centered at 0.
 ///
 /// If two solutions exist, return the one closer to the camera.
+/// 
+/// Don't return solutions behind the camera.
 fn sphere_intersection_origin(c: Vec3, d: Vec3, r: f64) -> Option<Vec3> {
     let t = {
         let a = d.norm_squared();
         let b = 2. * c.dot_product(d);
         let c = c.norm_squared() - r.powf(2.);
-        solve_quadratic(a, b, c)?[0]
+        let solutions = solve_quadratic(a, b, c)?;
+        solutions.into_iter().filter(|&t| t > 0.).next()?
     };
     Some(c + d.scale(t))
 }

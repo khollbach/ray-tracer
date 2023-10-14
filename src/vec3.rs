@@ -1,4 +1,7 @@
-use std::{iter::zip, ops::{Sub, Add}};
+use std::{
+    iter::zip,
+    ops::{Add, Sub},
+};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3 {

@@ -1,6 +1,6 @@
 use std::{
     iter::zip,
-    ops::{Add, Sub, Mul},
+    ops::{Add, Mul, Sub},
 };
 
 #[derive(Debug, Copy, Clone)]

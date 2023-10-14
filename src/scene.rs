@@ -52,6 +52,16 @@ impl Scene {
         println!("{} {} 255", self.screen_width, self.screen_height);
         println!();
 
+        // iterate over all pixels in the screen
+        for y in 0..self.screen_height {
+            for x in 0..self.screen_width {
+                let color = self.pixel_color(x, y);
+                println!("{}", color.ppm());
+            }
+        }
+    }
+
+    fn top_left_pixel(&self) -> Vec3 {
         // find the center pixel of the screen
         let adjust = [0.5, -0.5, 0.].into();
         let center = self.camera_position + FORWARD.scale(self.focal_distance) + adjust;
@@ -61,49 +71,48 @@ impl Scene {
         let dy = self.screen_height as f64 / 2.;
         let top_left = center + [dx, dy, 0.].into();
 
-        // iterate over all pixels in the screen
-        for y in 0..self.screen_height {
-            for x in 0..self.screen_width {
-                let x = x as f64;
-                let y = y as f64;
-                let p = top_left + [x, -y, 0.].into();
+        top_left
+    }
 
-                // todo: move this logic into a helper function
-                // that returns a color: self.pixel_color()
+    fn pixel_color(&self, x: u32, y: u32) -> Color {
+        let top_left = self.top_left_pixel();
 
-                // compute the dir'n of the ray
-                let start = self.camera_position;
-                let direction = p - start;
-                let ray = Ray { start, direction };
+        let x = x as f64;
+        let y = y as f64;
+        let p = top_left + [x, -y, 0.].into();
 
-                if let Some((sphere, p)) = self.cast(ray, f64::MAX) {
-                    // cast another ray, towards the light source
-                    let path = self.light_source - p;
-                    let ray = Ray {
-                        // TODO: this feels like a hack.
-                        // How else can we avoid hitting the current sphere
-                        // when we cast a ray? Maybe we skip it somehow?
-                        start: p + path.normalize().scale(0.1),
-                        direction: path,
-                    };
-                    let max_dist = path.norm();
+        // compute the dir'n of the ray
+        let start = self.camera_position;
+        let direction = p - start;
+        let ray = Ray { start, direction };
 
-                    let intercepted = self.cast(ray, max_dist).is_some();
-                    if intercepted {
-                        println!("0 0 0");
-                    } else {
-                        // compute a color value
-                        let brightness = path.normalize() * sphere.normal(p);
-                        let color = self
-                            .light_color
-                            .direct_product(sphere.color)
-                            .scale(brightness);
-                        println!("{}", color.ppm());
-                    }
-                } else {
-                    println!("0 0 0");
-                };
+        if let Some((sphere, p)) = self.cast(ray, f64::MAX) {
+            // cast another ray, towards the light source
+            let path = self.light_source - p;
+            let ray = Ray {
+                // TODO: this feels like a hack.
+                // How else can we avoid hitting the current sphere
+                // when we cast a ray? Maybe we skip it somehow?
+                start: p + path.normalize().scale(0.1),
+                direction: path,
+            };
+            let max_dist = path.norm();
+
+            let intercepted = self.cast(ray, max_dist).is_some();
+            if intercepted {
+                // hidden in shadow
+                Color::BLACK
+            } else {
+                // compute a color value
+                let brightness = path.normalize() * sphere.normal(p);
+                let color = self
+                    .light_color
+                    .direct_product(sphere.color)
+                    .scale(brightness);
+                color
             }
+        } else {
+            Color::BLACK
         }
     }
 
@@ -157,7 +166,7 @@ fn sphere_intersection(ray: Ray, sphere: Sphere) -> Option<Vec3> {
 /// r is the radius of a sphere centered at 0.
 ///
 /// If two solutions exist, return the one closer to the camera.
-/// 
+///
 /// Don't return solutions behind the camera.
 fn sphere_intersection_origin(c: Vec3, d: Vec3, r: f64) -> Option<Vec3> {
     let t = {

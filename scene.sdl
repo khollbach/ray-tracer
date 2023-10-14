@@ -1,0 +1,30 @@
+scene {
+    camera {
+        position 0 0 -20
+        up 0 1 0
+        right 1 0 0
+    }
+    focal-distance 10
+    screen {
+        width 64
+        height 48
+    }
+    lights {
+        light {
+            position -10 10 -20
+            color 255 200 255
+        }
+    }
+    objects {
+        sphere {
+            color 0 255 0
+            center -5 2.5 -2
+            radius 10
+        }
+        sphere {
+            color 0 0 255
+            center 5 -2.5 5
+            radius 15
+        }
+    }
+}

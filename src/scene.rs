@@ -1,4 +1,6 @@
 use crate::{
+    error::Result,
+    sdl,
     sphere::{Color, Sphere},
     vec3::Vec3,
 };
@@ -46,7 +48,27 @@ impl Scene {
         }
     }
 
+    pub fn from_sdl(text: &str) -> Result<Self> {
+        let tree = sdl::parse(text)?;
+        Ok(Self {
+            camera_position: tree.get_path("camera position")?.try_into()?,
+            camera_up: tree.get_path("camera up")?.try_into()?,
+            camera_right: tree.get_path("camera right")?.try_into()?,
+
+            focal_distance: tree.get_path("focal-distance")?.try_into()?,
+            screen_width: tree.get_path("screen width")?.try_into()?,
+            screen_height: tree.get_path("screen height")?.try_into()?,
+
+            light_source: tree.get_path("lights light position")?.try_into()?,
+            light_color: tree.get_path("lights light color")?.try_into()?,
+
+            spheres: tree.get_path("objects")?.try_into()?,
+        })
+    }
+
     /// Prints a PPM file to stdout.
+    // todo: render to a buffer, and then serialize the buffer to stdout.
+    // this'll let you refactor the PPM code into its own module.
     pub fn render(&self) {
         println!("P3");
         println!("{} {} 255", self.screen_width, self.screen_height);

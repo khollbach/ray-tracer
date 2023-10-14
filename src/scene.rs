@@ -17,14 +17,14 @@ pub struct Scene {
 
 const SPHERE_1: Sphere = Sphere {
     color: Color::GREEN,
-    center: Vec3::new(-5., 2.5, 0.),
+    center: Vec3::new(-5., 2.5, -2.),
     radius: 10.,
 };
 
 const SPHERE_2: Sphere = Sphere {
     color: Color::BLUE,
-    center: Vec3::new(5., -2.5, 0.),
-    radius: 10.,
+    center: Vec3::new(5., -2.5, 5.),
+    radius: 15.,
 };
 
 // todo: cross product of up and right

@@ -86,7 +86,7 @@ impl Scene {
     fn top_left_pixel(&self) -> Vec3 {
         // find the center pixel of the screen
         let adjust = [0.5, -0.5, 0.].into();
-        let center = self.camera_position + FORWARD.scale(self.focal_distance) + adjust;
+        let center = self.camera_position + self.focal_distance * FORWARD + adjust;
 
         // compute the corner of the screen
         let dx = -(self.screen_width as f64) / 2.;
@@ -115,7 +115,7 @@ impl Scene {
                 // TODO: this feels like a hack.
                 // How else can we avoid hitting the current sphere
                 // when we cast a ray? Maybe we skip it somehow?
-                start: p + path.normalize().scale(0.1),
+                start: p + path.normalize() * 0.1,
                 direction: path,
             };
             let max_dist = path.norm();
@@ -191,14 +191,14 @@ fn sphere_intersection(ray: Ray, sphere: Sphere) -> Option<Vec3> {
 ///
 /// Don't return solutions behind the camera.
 fn sphere_intersection_origin(c: Vec3, d: Vec3, r: f64) -> Option<Vec3> {
-    let t = {
+    let t: f64 = {
         let a = d.norm_squared();
         let b = 2. * c.dot_product(d);
         let c = c.norm_squared() - r.powf(2.);
         let solutions = solve_quadratic(a, b, c)?;
         solutions.into_iter().filter(|&t| t > 0.).next()?
     };
-    Some(c + d.scale(t))
+    Some(c + t * d)
 }
 
 /// Return 0 or 2 solutions to:

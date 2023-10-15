@@ -1,6 +1,6 @@
 use std::{
     iter::zip,
-    ops::{Add, Mul, Sub},
+    ops::{Add, Div, Mul, Neg, Sub},
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -27,7 +27,6 @@ impl Vec3 {
         self.coords[2]
     }
 
-    // todo: could we implement `*` for f64 and Vec3 ?
     #[must_use]
     pub fn scale(self, a: f64) -> Self {
         Self {
@@ -35,22 +34,21 @@ impl Vec3 {
         }
     }
 
-    // todo: could we implement `*` for Vec3 and Vec3?
     pub fn dot_product(self, other: Self) -> f64 {
         zip(self.coords, other.coords).map(|(a, b)| a * b).sum()
     }
 
     #[must_use]
     pub fn normalize(self) -> Self {
-        self.scale(1. / self.norm())
+        self / self.norm()
     }
 
     pub fn norm_squared(self) -> f64 {
-        self.dot_product(self)
+        self * self
     }
 
     pub fn norm(self) -> f64 {
-        self.dot_product(self).sqrt()
+        self.norm_squared().sqrt()
     }
 
     pub fn direct_product(self, other: Self) -> Self {
@@ -78,19 +76,54 @@ impl Add for Vec3 {
     }
 }
 
+impl Neg for Vec3 {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        self * -1.
+    }
+}
+
 impl Sub for Vec3 {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        self + other.scale(-1.)
+        self + (-other)
     }
 }
 
+/// Dot product.
 impl Mul for Vec3 {
     type Output = f64;
 
-    /// Dot product.
     fn mul(self, other: Self) -> f64 {
         self.dot_product(other)
+    }
+}
+
+/// Scalar multiplication: `vec * scalar`.
+impl Mul<f64> for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, scalar: f64) -> Vec3 {
+        self.scale(scalar)
+    }
+}
+
+/// Scalar multiplication: `scalar * vec`.
+impl Mul<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, vec: Vec3) -> Vec3 {
+        vec.scale(self)
+    }
+}
+
+/// Division by a scalar.
+impl Div<f64> for Vec3 {
+    type Output = Vec3;
+
+    fn div(self, scalar: f64) -> Vec3 {
+        self * (1. / scalar)
     }
 }

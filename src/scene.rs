@@ -1,7 +1,8 @@
 use crate::{
     error::Result,
     sdl,
-    sphere::{Color, Sphere},
+    color::Color,
+    sphere::Sphere,
     vec3::Vec3,
 };
 
@@ -17,37 +18,11 @@ pub struct Scene {
     light_color: Color,
 }
 
-const SPHERE_1: Sphere = Sphere {
-    color: Color::GREEN,
-    center: Vec3::new(-5., 2.5, -2.),
-    radius: 10.,
-};
-
-const SPHERE_2: Sphere = Sphere {
-    color: Color::BLUE,
-    center: Vec3::new(5., -2.5, 5.),
-    radius: 15.,
-};
-
 // todo: cross product of up and right
 // todo: remove the assumption that z-axis+ means forward (may be hard)
 const FORWARD: Vec3 = Vec3::new(0., 0., 1.);
 
 impl Scene {
-    pub fn example() -> Self {
-        Self {
-            spheres: vec![SPHERE_1, SPHERE_2],
-            camera_position: Vec3::new(0., 0., -20.),
-            camera_up: Vec3::new(0., 1., 0.),
-            camera_right: Vec3::new(1., 0., 0.),
-            focal_distance: 10.,
-            screen_width: 64,
-            screen_height: 48,
-            light_source: Vec3::new(-10., 10., -20.),
-            light_color: Color::new(255, 200, 255),
-        }
-    }
-
     pub fn from_sdl(text: &str) -> Result<Self> {
         let tree = sdl::parse(text)?;
         Ok(Self {

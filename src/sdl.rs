@@ -2,7 +2,8 @@
 
 use crate::{
     error::{Error, Result},
-    sphere::{Color, Sphere},
+    color::Color,
+    sphere::Sphere,
     vec3::Vec3,
 };
 use std::result::Result as StdResult;

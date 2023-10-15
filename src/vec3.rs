@@ -9,8 +9,6 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    const ZERO: Self = Self::new(0., 0., 0.);
-
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { coords: [x, y, z] }
     }

@@ -1,6 +1,7 @@
 mod error;
 mod scene;
 mod sdl;
+mod color;
 mod sphere;
 mod vec3;
 

@@ -1,10 +1,4 @@
-use crate::{
-    error::Result,
-    sdl,
-    color::Color,
-    sphere::Sphere,
-    vec3::Vec3,
-};
+use crate::{color::Color, error::Result, sdl, sphere::Sphere, vec3::Vec3};
 
 pub struct Scene {
     spheres: Vec<Sphere>,

@@ -2,8 +2,6 @@ use std::fmt;
 
 use crate::vec3::Vec3;
 
-// todo: maybe add a way to work with color values as real numbers ?
-
 #[derive(Debug, Clone, Copy)]
 pub struct Color {
     r: u8,
@@ -27,22 +25,19 @@ impl Color {
         Self { r, g, b }
     }
 
-    // todo: the to/from vec3 business seems a little hacky
-    // Maybe making it more fully-featured / though-out will feel nicer?
-
     #[must_use]
     pub fn direct_product(self, other: Color) -> Self {
-        let product = self.to_vec3().direct_product(other.to_vec3());
-        Self::from_vec3(product)
+        let product = self.to_unit_cube().direct_product(other.to_unit_cube());
+        Self::from_unit_cube(product)
     }
 
     #[must_use]
     pub fn scale(self, multiplier: f64) -> Self {
-        let scaled = self.to_vec3().scale(multiplier);
-        Self::from_vec3(scaled)
+        let scaled = self.to_unit_cube().scale(multiplier);
+        Self::from_unit_cube(scaled)
     }
 
-    fn to_vec3(self) -> Vec3 {
+    fn to_unit_cube(self) -> Vec3 {
         let Self { r, g, b } = self;
         let x = r as f64 / 255.;
         let y = g as f64 / 255.;
@@ -50,7 +45,8 @@ impl Color {
         Vec3::new(x, y, z)
     }
 
-    fn from_vec3(rgb: Vec3) -> Self {
+    /// Clamping, if necessary.
+    fn from_unit_cube(rgb: Vec3) -> Self {
         let r = (rgb.x().clamp(0., 1.) * 255.) as u8;
         let g = (rgb.y().clamp(0., 1.) * 255.) as u8;
         let b = (rgb.z().clamp(0., 1.) * 255.) as u8;

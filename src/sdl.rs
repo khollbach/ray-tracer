@@ -1,8 +1,8 @@
 //! Scene description language.
 
 use crate::{
-    error::{Error, Result},
     color::Color,
+    error::{Error, Result},
     sphere::Sphere,
     vec3::Vec3,
 };

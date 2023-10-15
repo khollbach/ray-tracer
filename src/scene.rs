@@ -18,7 +18,7 @@ const FORWARD: Vec3 = Vec3::new(0., 0., 1.);
 
 impl Scene {
     pub fn from_sdl(text: &str) -> Result<Self> {
-        let tree = sdl::parse(text)?;
+        let tree: sdl::Node = text.parse()?;
         Ok(Self {
             camera_position: tree.get_path("camera position")?.try_into()?,
             camera_up: tree.get_path("camera up")?.try_into()?,

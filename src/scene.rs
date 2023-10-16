@@ -1,7 +1,9 @@
-use crate::{color::Color, error::Result, sdl, sphere::Sphere, vec3::Vec3};
+use std::ops::Deref;
+
+use crate::{color::Color, error::Result, objects::Object, sdl, vec3::Vec3};
 
 pub struct Scene {
-    spheres: Vec<Sphere>,
+    objects: Vec<Box<dyn Object>>,
     camera_position: Vec3,
     camera_up: Vec3,
     camera_right: Vec3,
@@ -31,7 +33,7 @@ impl Scene {
             light_source: tree.get_path("lights light position")?.try_into()?,
             light_color: tree.get_path("lights light color")?.try_into()?,
 
-            spheres: tree.get_path("objects")?.try_into()?,
+            objects: tree.get_path("objects")?.try_into()?,
         })
     }
 
@@ -77,7 +79,7 @@ impl Scene {
         let direction = p - start;
         let ray = Ray { start, direction };
 
-        if let Some((sphere, p)) = self.cast(ray, f64::MAX) {
+        if let Some((obj, p)) = self.cast(ray, f64::MAX) {
             // cast another ray, towards the light source
             let path = self.light_source - p;
             let ray = Ray {
@@ -95,10 +97,10 @@ impl Scene {
                 Color::BLACK
             } else {
                 // compute a color value
-                let brightness = path.normalize() * sphere.normal(p);
+                let brightness = path.normalize() * obj.normal(p);
                 let color = self
                     .light_color
-                    .direct_product(sphere.color)
+                    .direct_product(obj.color())
                     .scale(brightness);
                 color
             }
@@ -107,12 +109,12 @@ impl Scene {
         }
     }
 
-    fn cast(&self, ray: Ray, max_dist: f64) -> Option<(Sphere, Vec3)> {
+    fn cast(&self, ray: Ray, max_dist: f64) -> Option<(&dyn Object, Vec3)> {
         let dist = |p: Vec3| (p - ray.start).norm_squared().sqrt();
 
         let mut closest_hit = None;
-        for &s in &self.spheres {
-            if let Some(p) = sphere_intersection(ray, s) {
+        for obj in &self.objects {
+            if let Some(p) = obj.hit_test(ray) {
                 if dist(p) > max_dist {
                     continue;
                 }
@@ -122,7 +124,7 @@ impl Scene {
                     None => true,
                 };
                 if is_closer {
-                    closest_hit = Some((s, p));
+                    closest_hit = Some((obj.deref(), p));
                 }
             }
         }
@@ -131,58 +133,7 @@ impl Scene {
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Ray {
-    start: Vec3,
-    direction: Vec3,
-}
-
-fn sphere_intersection(ray: Ray, sphere: Sphere) -> Option<Vec3> {
-    // We shift the universe so that our sphere is at the center.
-    // Then we use the existing function to hit test.
-    // And then we shift everything back to normal.
-
-    let c = ray.start - sphere.center;
-    let d = ray.direction;
-    let r = sphere.radius;
-    let p = sphere_intersection_origin(c, d, r)?;
-    Some(p + sphere.center)
-}
-
-/// Return a solution to the equations:
-/// v = c + t d
-/// v v = r^2
-///
-/// c is the camera's location.
-/// d is the direction of a ray from the camera.
-/// r is the radius of a sphere centered at 0.
-///
-/// If two solutions exist, return the one closer to the camera.
-///
-/// Don't return solutions behind the camera.
-fn sphere_intersection_origin(c: Vec3, d: Vec3, r: f64) -> Option<Vec3> {
-    let t: f64 = {
-        let a = d.norm_squared();
-        let b = 2. * c.dot_product(d);
-        let c = c.norm_squared() - r.powf(2.);
-        let solutions = solve_quadratic(a, b, c)?;
-        solutions.into_iter().filter(|&t| t > 0.).next()?
-    };
-    Some(c + t * d)
-}
-
-/// Return 0 or 2 solutions to:
-/// a x^2 + b x + c = 0
-///
-/// The solutions may be the same. They are sorted non-decreasing.
-fn solve_quadratic(a: f64, b: f64, c: f64) -> Option<[f64; 2]> {
-    // formula: (-b +- sqrt(b^2 - 4ac)) / 2a
-
-    let d = b.powf(2.) - 4. * a * c;
-    if d < 0. {
-        return None;
-    }
-
-    let soln1 = (-b - d.sqrt()) / (2. * a);
-    let soln2 = (-b + d.sqrt()) / (2. * a);
-    Some([soln1, soln2])
+pub struct Ray {
+    pub start: Vec3,
+    pub direction: Vec3,
 }

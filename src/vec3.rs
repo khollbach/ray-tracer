@@ -1,6 +1,6 @@
 use std::{
     iter::zip,
-    ops::{Add, Div, Mul, Neg, Sub},
+    ops::{Add, Div, Mul, Neg, Sub, SubAssign},
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -89,6 +89,12 @@ impl Sub for Vec3 {
 
     fn sub(self, other: Self) -> Self {
         self + (-other)
+    }
+}
+
+impl SubAssign for Vec3 {
+    fn sub_assign(&mut self, other: Self) {
+        *self = *self - other;
     }
 }
 

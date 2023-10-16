@@ -1,8 +1,8 @@
 mod color;
 mod error;
+mod objects;
 mod scene;
 mod sdl;
-mod sphere;
 mod vec3;
 
 use std::fs;

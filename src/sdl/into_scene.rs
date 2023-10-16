@@ -7,7 +7,7 @@
 use crate::{
     color::Color,
     error::{Error, Result},
-    sphere::Sphere,
+    objects::Sphere,
     vec3::Vec3,
 };
 

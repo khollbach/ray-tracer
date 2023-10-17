@@ -25,7 +25,12 @@ fn parse(text: &str) -> Result<Node> {
         children: vec![],
     });
 
-    for line in text.lines() {
+    for mut line in text.lines() {
+        // Trim comments.
+        if let Some(idx) = line.find("//") {
+            line = &line[..idx];
+        }
+
         let mut words: Vec<_> = line.split_whitespace().collect();
         if words.is_empty() {
             continue; // ignore blank lines
@@ -88,7 +93,8 @@ mod tests {
     #[test]
     fn eyeball_test() {
         let s = "
-    scene {
+    // this is a comment
+    scene { // this is an end of line comment
         camera {
             position 0 0 -20
             up 0 1 0

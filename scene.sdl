@@ -27,26 +27,33 @@ scene {
             radius 15
         }
 
+        // walls:
+
+        // back
         plane {
             normal 0 0 1
             anchor 0 0 10
             color 255 255 255
         }
+        // left
         plane {
             normal 1 0 0
             anchor -30 0 0
             color 255 255 255
         }
+        // right
         plane {
             normal 1 0 0
             anchor 30 0 0
             color 255 255 255
         }
+        // top
         plane {
             normal 0 1 0
             anchor 0 30 0
             color 255 255 255
         }
+        // bottom
         plane {
             normal 0 1 0
             anchor 0 -30 0

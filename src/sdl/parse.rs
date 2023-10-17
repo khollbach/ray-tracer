@@ -81,8 +81,10 @@ fn is_valid_name(name: &str) -> bool {
     !name.starts_with(|c: char| c.is_ascii_digit()) && name.chars().all(valid_char)
 }
 
-#[test]
+#[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
     fn eyeball_test() {
         let s = "

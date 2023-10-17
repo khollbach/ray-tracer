@@ -1,6 +1,15 @@
-use std::ops::Deref;
+use std::{
+    any::{self, Any, TypeId},
+    ops::Deref,
+};
 
-use crate::{color::Color, error::Result, objects::Object, sdl, vec3::Vec3};
+use crate::{
+    color::Color,
+    error::Result,
+    objects::{Object, Plane, Sphere},
+    sdl,
+    vec3::Vec3,
+};
 
 pub struct Scene {
     objects: Vec<Box<dyn Object>>,
@@ -97,7 +106,9 @@ impl Scene {
                 Color::BLACK
             } else {
                 // compute a color value
-                let brightness = path.normalize() * obj.normal(p);
+                // The "insides" of a surface should also be visible --
+                // hence the .abs() here.
+                let brightness = (path.normalize() * obj.normal(p)).abs();
                 let color = self
                     .light_color
                     .direct_product(obj.color())

@@ -7,7 +7,7 @@
 use crate::{
     color::Color,
     error::{Error, Result},
-    objects::Sphere,
+    objects::{Object, Plane, Sphere},
     vec3::Vec3,
 };
 
@@ -160,4 +160,60 @@ impl TryFrom<&Node> for Sphere {
             radius: node.get_path("radius")?.try_into()?,
         })
     }
+}
+
+impl TryFrom<&Node> for Plane {
+    type Error = Error;
+
+    fn try_from(node: &Node) -> Result<Self> {
+        let fail = "cannot convert to Plane:";
+        if !node.values.is_empty() {
+            Err(format!(
+                "{fail} node has {} values (expected 0)",
+                node.values.len()
+            ))?
+        }
+        Ok(Self {
+            anchor: node.get_path("anchor")?.try_into()?,
+            normal: node.get_path("normal")?.try_into()?,
+            color: node.get_path("color")?.try_into()?,
+        })
+    }
+}
+
+// todo: reduce code dup b/w this and Vec<Sphere>
+// (or just remove vec sphere entirely)
+
+impl TryFrom<&Node> for Vec<Box<dyn Object>> {
+    type Error = Error;
+
+    fn try_from(node: &Node) -> Result<Self> {
+        let fail = "cannot convert to Vec<Box<dyn Object>>:";
+        if !node.values.is_empty() {
+            Err(format!(
+                "{fail} node has {} values (expected 0)",
+                node.values.len()
+            ))?
+        }
+        node.children
+            .iter()
+            .map(|node| {
+                // todo: there must be a nice way to short-circuit here
+                dyn_sphere(node).or(dyn_plane(node))
+            })
+            .collect::<Result<Self>>()
+            .map_err(|e| format!("{fail} {e}").into())
+    }
+}
+
+// todo: understand why the below works, and how to simplify it.
+
+fn dyn_sphere(node: &Node) -> Result<Box<dyn Object>> {
+    let sphere: Result<Sphere> = node.try_into();
+    Ok(sphere.map(Box::new)?)
+}
+
+fn dyn_plane(node: &Node) -> Result<Box<dyn Object>> {
+    let plane: Result<Plane> = node.try_into();
+    Ok(plane.map(Box::new)?)
 }

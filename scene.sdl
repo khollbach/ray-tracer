@@ -11,7 +11,7 @@ scene {
     }
     lights {
         light {
-            position -10 10 -20
+            position 5 0 -20
             color 255 200 255
         }
     }
@@ -25,6 +25,11 @@ scene {
             color 0 0 255
             center 5 -2.5 5
             radius 15
+        }
+        plane {
+            normal 0 0 1
+            anchor 0 0 10
+            color 255 255 255
         }
     }
 }

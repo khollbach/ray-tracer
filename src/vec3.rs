@@ -10,6 +10,9 @@ pub struct Vec3 {
 
 impl Vec3 {
     pub const ZERO: Vec3 = Vec3::new(0., 0., 0.);
+    pub const X_AXIS: Vec3 = Vec3::new(1., 0., 0.);
+    pub const Y_AXIS: Vec3 = Vec3::new(0., 1., 0.);
+    pub const Z_AXIS: Vec3 = Vec3::new(0., 0., 1.);
 
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { coords: [x, y, z] }

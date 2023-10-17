@@ -4,9 +4,9 @@ use super::Object;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Plane {
-    anchor: Vec3,
-    normal: Vec3,
-    color: Color,
+    pub anchor: Vec3,
+    pub normal: Vec3,
+    pub color: Color,
 }
 
 impl Object for Plane {
@@ -44,10 +44,32 @@ fn plane_intersection_origin(ray: Ray, normal: Vec3) -> Option<Vec3> {
             return None;
         }
     }
-    let t = normal * ray.start / rhs;
+    let t = -(normal * ray.start / rhs);
     if t >= 0. {
         Some(ray.start + t * ray.direction)
     } else {
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{color::Color, scene::Ray, vec3::Vec3};
+
+    #[test]
+    fn hit_test() {
+        let obj = Plane {
+            anchor: Vec3::ZERO,
+            normal: Vec3::Z_AXIS,
+            color: Color::WHITE,
+        };
+        let ray = Ray {
+            start: -10. * Vec3::Z_AXIS,
+            direction: Vec3::Z_AXIS,
+        };
+        let hit = obj.hit_test(ray);
+        assert!(hit.is_some());
+        dbg!(hit);
     }
 }

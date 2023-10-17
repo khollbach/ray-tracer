@@ -1,0 +1,55 @@
+scene {
+    camera {
+        position 278 273 -800
+        up 0 1 0
+        right 1 0 0
+    }
+    focal-distance 35 // todo: use the actual number, 0.035
+    screen {
+        // todo: add support for fractional sizes and custom resolutions
+        width 25
+        height 25
+    }
+    lights {
+        light {
+            position 278 548 279.5 
+            color 255 230 255 // todo: what color?
+        }
+    }
+    objects {
+        // floor
+        plane {
+            color 255 255 255
+            normal 0 1 0
+            anchor 0 0 0
+        }
+        // ceiling
+        plane {
+            color 255 255 255
+            normal 0 1 0
+            anchor 0 548.8 0
+        }
+        // back wall
+        plane {
+            color 255 255 255
+            normal 0 0 1
+            anchor 0 0 559.2
+        }
+        // right wall
+        plane {
+            color 0 255 0
+            normal 1 0 0
+            anchor 0 0 0
+        }
+        // left wall
+        plane {
+            color 255 0 0
+            normal -0.999967 0.00583071 -0.00572227
+            anchor 552.8 0 0
+        }
+
+        // TODO: my left and right walls are flipped,
+        // but I tried to copy their data exactly.
+        // How come?
+    }
+}

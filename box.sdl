@@ -27,13 +27,13 @@ scene {
         plane {
             color 255 255 255
             normal 0 1 0
-            anchor 0 548.8 0
+            anchor 0 550 0
         }
         // back wall
         plane {
             color 255 255 255
             normal 0 0 1
-            anchor 0 0 559.2
+            anchor 0 0 550
         }
         // right wall
         plane {
@@ -44,8 +44,8 @@ scene {
         // left wall
         plane {
             color 255 0 0
-            normal -0.999967 0.00583071 -0.00572227
-            anchor 552.8 0 0
+            normal 1 0 0
+            anchor 550 0 0
         }
 
         // TODO: my left and right walls are flipped,

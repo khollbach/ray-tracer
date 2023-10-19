@@ -11,12 +11,30 @@ scene {
         height 25
     }
     lights {
+        //light {
+        //    position 278 548 279.5 
+        //    color 255 255 255 // todo: what color?
+        //}
+
+        // Similar position to camera, so we can see what's in front of us.
         light {
-            position 278 548 279.5 
-            color 255 230 255 // todo: what color?
+            position 200 300 100
+            color 255 230 255
         }
     }
     objects {
+        //sphere {
+        //    color 0 255 0
+        //    center 175 175 330
+        //    radius 100
+        //}
+        
+        sphere {
+            color 100 100 255
+            center 275 150 400
+            radius 150
+        }
+
         // floor
         plane {
             color 255 255 255
